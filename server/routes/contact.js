@@ -2,6 +2,7 @@
 
 const express   = require('express');
 const { body, validationResult } = require('express-validator');
+const Contact = require('../models/Contact');
 
 const router = express.Router();
 
@@ -43,6 +44,17 @@ router.post('/', validateContact, async (req, res) => {
   console.log(`  Message : ${message}`);
   console.log('  ─────────────────────────────────────────\n');
 
+  try {
+    await Contact.create({
+      name,
+      email,
+      message,
+    });
+  } catch (dbError) {
+    console.error('Failed to save contact submission:', dbError.message);
+    return res.status(500).json({ error: 'Could not save contact submission' });
+  }
+
   // ── Nodemailer email integration (placeholder) ─────────────────────────────
   //
   // To enable email notifications:
@@ -81,6 +93,30 @@ router.post('/', validateContact, async (req, res) => {
     success: true,
     message: 'Thank you for contacting AROM INFRACON. We will get back to you shortly!',
   });
+});
+
+// ── GET /api/contact?limit=50 ───────────────────────────────────────────────
+router.get('/', async (req, res) => {
+  const rawLimit = Number(req.query.limit);
+  const limit = Number.isFinite(rawLimit)
+    ? Math.min(Math.max(rawLimit, 1), 100)
+    : 50;
+
+  try {
+    const submissions = await Contact.find({})
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('name email message createdAt');
+
+    return res.status(200).json({
+      success: true,
+      count: submissions.length,
+      data: submissions,
+    });
+  } catch (error) {
+    console.error('Failed to fetch contact submissions:', error.message);
+    return res.status(500).json({ error: 'Could not fetch contact submissions' });
+  }
 });
 
 module.exports = router;

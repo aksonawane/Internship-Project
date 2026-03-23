@@ -18,6 +18,7 @@ const FOOTER_LINKS = [
   { name: 'Services', path: '/services' },
   { name: 'Projects', path: '/projects' },
   { name: 'Contact', path: '/contact' },
+  { name: 'Submissions', path: '/submissions' },
 ];
 
 const SOCIAL = [

@@ -10,6 +10,7 @@
 const express = require('express');
 const cors    = require('cors');
 const dotenv  = require('dotenv');
+const mongoose = require('mongoose');
 
 // Load .env variables (PORT, CLIENT_ORIGIN, EMAIL_USER, etc.)
 dotenv.config();
@@ -18,6 +19,7 @@ const contactRouter = require('./routes/contact');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // ── Security: only allow requests from the configured frontend origin ─────────
 const allowedOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
@@ -54,9 +56,26 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n  AROM INFRACON Backend`);
-  console.log(`  Running  → http://localhost:${PORT}`);
-  console.log(`  Health   → http://localhost:${PORT}/api/health`);
-  console.log(`  CORS     → ${allowedOrigin}\n`);
-});
+const startServer = async () => {
+  if (!MONGODB_URI) {
+    console.error('MONGODB_URI is missing. Add it in server/.env');
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('MongoDB connected successfully.');
+
+    app.listen(PORT, () => {
+      console.log(`\n  AROM INFRACON Backend`);
+      console.log(`  Running  → http://localhost:${PORT}`);
+      console.log(`  Health   → http://localhost:${PORT}/api/health`);
+      console.log(`  CORS     → ${allowedOrigin}\n`);
+    });
+  } catch (error) {
+    console.error('MongoDB connection failed:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
