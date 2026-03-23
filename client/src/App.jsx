@@ -9,7 +9,6 @@ import About from './pages/About';
 import Services from './pages/Services';
 import Projects from './pages/Projects';
 import Contact from './pages/Contact';
-import Submissions from './pages/Submissions';
 
 const App = () => (
   <Router>
@@ -28,7 +27,6 @@ const App = () => (
           <Route path="/services" element={<Services />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/contact"  element={<Contact />}  />
-          <Route path="/submissions" element={<Submissions />} />
         </Routes>
       </main>
 
